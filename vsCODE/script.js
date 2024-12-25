@@ -34,8 +34,8 @@ function renderMenu() {
             <p>${menu.price}원</p>
         `;
 
-        menuItem.addEventListener("dragstart", onDragStartMenu);
-        menuItem.addEventListener("dragend", onDragEndMenu);
+        menuItem.addEventListener("dragstart", onDragStartMenu); // 메뉴 드래그 시작 이벤트
+        menuItem.addEventListener("dragend", onDragEndMenu); // 메뉴 드래그 종료 이벤트
         menuContainer.appendChild(menuItem);
     });
 }
@@ -43,22 +43,22 @@ function renderMenu() {
 // Drag and Drop Event Handlers
 function onDragStartMenu(event) {
     draggingMenu = this;
-    this.classList.add("draggingMenu");
+    this.classList.add("draggingMenu"); // 드래그 중인 상태 스타일 추가
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", this.getAttribute("menuname"));
 }
 
 function onDragEndMenu(event) {
     draggingMenu = null;
-    this.classList.remove("draggingMenu");
+    this.classList.remove("draggingMenu"); // 드래그 상태 스타일 제거
 }
 
 function onDragOverBox(event) {
-    event.preventDefault();
+    event.preventDefault(); // 기본 드래그 동작 방지
 }
 
 function onDropBox(event) {
-    event.preventDefault();
+    event.preventDefault(); // 기본 드롭 동작 방지
     const targetBox = this;
 
     if (draggingMenu) {
@@ -66,6 +66,7 @@ function onDropBox(event) {
         const menuPrice = parseInt(draggingMenu.getAttribute("price"), 10);
 
         if (targetBox.id === "cart-container") {
+            // 장바구니에 추가
             const existingItem = targetBox.querySelector(`.cart-item[menuname="${menuName}"]`);
             if (existingItem) return;
 
@@ -84,12 +85,13 @@ function onDropBox(event) {
             `;
             clonedMenu.appendChild(controls);
 
-            addCartEvents(clonedMenu, menuPrice);
+            addCartEvents(clonedMenu, menuPrice); // 장바구니 이벤트 추가
             targetBox.querySelector("#cart").appendChild(clonedMenu);
 
-            draggingMenu.style.display = "none";
-            updateTotal(menuPrice);
+            draggingMenu.style.display = "none"; // 메뉴 숨기기
+            updateTotal(menuPrice); // 총액 업데이트
         } else if (targetBox.id === "menu-container") {
+            // 메뉴로 다시 이동
             const cartItem = document.querySelector(`.cart-item[menuname="${menuName}"]`);
             if (cartItem) {
                 const quantity = parseInt(cartItem.querySelector(".quantity").textContent, 10);
@@ -99,7 +101,7 @@ function onDropBox(event) {
 
             const menuItem = document.querySelector(`.menu[menuname="${menuName}"]`);
             if (menuItem) {
-                menuItem.style.display = "block";
+                menuItem.style.display = "block"; // 메뉴 보이기
             }
         }
     }
@@ -107,13 +109,13 @@ function onDropBox(event) {
 
 // Utility Functions
 function updateTotal(priceChange) {
-    totalPrice += priceChange;
-    document.getElementById("total-price").textContent = totalPrice;
+    totalPrice += priceChange; // 총액 변경
+    document.getElementById("total-price").textContent = totalPrice; // 화면에 반영
 }
 
 function addCartEvents(cartItem, menuPrice) {
-    cartItem.addEventListener("dragstart", onDragStartMenu);
-    cartItem.addEventListener("dragend", onDragEndMenu);
+    cartItem.addEventListener("dragstart", onDragStartMenu); // 장바구니 항목 드래그 시작 이벤트
+    cartItem.addEventListener("dragend", onDragEndMenu); // 장바구니 항목 드래그 종료 이벤트
 
     cartItem.querySelector(".increase").addEventListener("click", () => {
         const quantity = cartItem.querySelector(".quantity");
@@ -121,7 +123,7 @@ function addCartEvents(cartItem, menuPrice) {
         const count = parseInt(quantity.textContent, 10) + 1;
         quantity.textContent = count;
         subtotal.textContent = count * menuPrice;
-        updateTotal(menuPrice);
+        updateTotal(menuPrice); // 증가에 따른 총액 업데이트
     });
 
     cartItem.querySelector(".decrease").addEventListener("click", () => {
@@ -131,15 +133,15 @@ function addCartEvents(cartItem, menuPrice) {
         if (count > 0) {
             quantity.textContent = count;
             subtotal.textContent = count * menuPrice;
-            updateTotal(-menuPrice);
+            updateTotal(-menuPrice); // 감소에 따른 총액 업데이트
         } else {
             const menuName = cartItem.getAttribute("menuname");
             const menuItem = document.querySelector(`.menu[menuname="${menuName}"]`);
             if (menuItem) {
-                menuItem.style.display = "block";
+                menuItem.style.display = "block"; // 메뉴 다시 보이기
             }
             cartItem.remove();
-            updateTotal(-menuPrice);
+            updateTotal(-menuPrice); // 삭제 시 총액 업데이트
         }
     });
 }
@@ -150,7 +152,7 @@ function saveSalesToHistory(cartItems) {
     const sale = {
         date,
         items: [],
-        total: totalPrice,
+        total: totalPrice, // 총액 기록
     };
 
     cartItems.forEach(item => {
@@ -159,11 +161,11 @@ function saveSalesToHistory(cartItems) {
         const price = parseInt(item.getAttribute("price"), 10);
         const subtotal = price * quantity;
 
-        sale.items.push({ name, quantity, subtotal });
+        sale.items.push({ name, quantity, subtotal }); // 판매 내역에 항목 추가
     });
 
     salesHistory.push(sale);
-    localStorage.setItem("salesHistory", JSON.stringify(salesHistory));
+    localStorage.setItem("salesHistory", JSON.stringify(salesHistory)); // 로컬 스토리지에 저장
 }
 
 // Display Receipt
@@ -184,15 +186,15 @@ function displayReceipt() {
         const subtotal = price * quantity;
 
         receiptText += `${name} x ${quantity} = ${subtotal}원\n`;
-        total += subtotal;
+        total += subtotal; // 총합 계산
     });
 
     receiptText += `\n총액: ${total}원\n\n결제 완료!`;
-    alert(receiptText);
+    alert(receiptText); // 영수증 출력
 
-    saveSalesToHistory(cartItems);
-    resetCartAndMenu();
-    location.reload();
+    saveSalesToHistory(cartItems); // 판매 기록 저장
+    resetCartAndMenu(); // 장바구니 초기화
+    location.reload(); // 페이지 새로고침
 }
 
 // Reset Cart and Menu
@@ -202,36 +204,36 @@ function resetCartAndMenu() {
         const menuName = item.getAttribute("menuname");
         const menuItem = document.querySelector(`.menu[menuname="${menuName}"]`);
         if (menuItem) {
-            menuItem.style.display = "block";
+            menuItem.style.display = "block"; // 메뉴 다시 보이기
         }
     });
 
-    document.getElementById("cart").innerHTML = "";
-    totalPrice = 0;
+    document.getElementById("cart").innerHTML = ""; // 장바구니 비우기
+    totalPrice = 0; // 총액 초기화
     document.getElementById("total-price").textContent = totalPrice;
 }
 
 // Admin Page Handlers
 function openAdminPage() {
-    window.location.href = "admin.html";
+    window.location.href = "admin.html"; // 관리자 페이지 이동
 }
 
 // Initialization
 document.addEventListener("DOMContentLoaded", () => {
     if (!localStorage.getItem("currentMenuStorage")) {
-        saveCurrentMenu();
+        saveCurrentMenu(); // 메뉴 초기화
     }
-    renderMenu();
+    renderMenu(); // 메뉴 렌더링
 
     const boxes = document.querySelectorAll(".box");
     boxes.forEach(box => {
-        box.addEventListener("dragover", onDragOverBox);
-        box.addEventListener("drop", onDropBox);
+        box.addEventListener("dragover", onDragOverBox); // 박스 드래그 오버 처리
+        box.addEventListener("drop", onDropBox); // 박스 드롭 처리
     });
 
-    document.getElementById("pay-button").addEventListener("click", displayReceipt);
+    document.getElementById("pay-button").addEventListener("click", displayReceipt); // 결제 버튼 클릭 이벤트
     const adminButton = document.getElementById("admin-button");
     if (adminButton) {
-        adminButton.addEventListener("click", openAdminPage);
+        adminButton.addEventListener("click", openAdminPage); // 관리자 버튼 클릭 이벤트
     }
 });
